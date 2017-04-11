@@ -451,18 +451,7 @@ private extension DropDown {
 
 		setHiddentState()
 		isHidden = true
-        
-        tableView.addObserver(self, forKeyPath: "contentSize", options: .new, context: nil)
 	}
-    
-    override public func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        if let table = object as? UITableView, table == tableView {
-            if keyPath == "contentSize" {
-                self.updateConstraints()
-            }
-        }
-    }
-
 }
 
 //MARK: - UI
@@ -488,6 +477,7 @@ extension DropDown {
 		xConstraint.constant = layout.x
 		yConstraint.constant = layout.y
 		widthConstraint.constant = layout.width
+        tableView.layoutIfNeeded()
 		heightConstraint.constant = min(layout.visibleHeight, tableView.contentSize.height)
 
 //		tableView.isScrollEnabled = layout.offscreenHeight > 0
