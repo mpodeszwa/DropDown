@@ -351,7 +351,7 @@ public final class DropDown: UIView {
 	}
 
 	fileprivate var minHeight: CGFloat {
-		return tableView.rowHeight
+		return tableView.estimatedRowHeight
 	}
 
 	fileprivate var didSetupConstraints = false
@@ -442,7 +442,8 @@ private extension DropDown {
 		tableViewContainer.layer.shadowOpacity = shadowOpacity
 		tableViewContainer.layer.shadowRadius = shadowRadius
 
-		tableView.rowHeight = cellHeight
+		tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.estimatedRowHeight = cellHeight
 		tableView.backgroundColor = tableViewBackgroundColor
 		tableView.separatorColor = separatorColor
 		tableView.layer.cornerRadius = cornerRadius
@@ -450,7 +451,17 @@ private extension DropDown {
 
 		setHiddentState()
 		isHidden = true
+        
+        tableView.addObserver(self, forKeyPath: "contentSize", options: .new, context: nil)
 	}
+    
+    override public func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if let table = object as? UITableView, table == tableView {
+            if keyPath == "contentSize" {
+                self.updateConstraints()
+            }
+        }
+    }
 
 }
 
@@ -477,9 +488,9 @@ extension DropDown {
 		xConstraint.constant = layout.x
 		yConstraint.constant = layout.y
 		widthConstraint.constant = layout.width
-		heightConstraint.constant = layout.visibleHeight
+		heightConstraint.constant = min(layout.visibleHeight, tableView.contentSize.height)
 
-		tableView.isScrollEnabled = layout.offscreenHeight > 0
+//		tableView.isScrollEnabled = layout.offscreenHeight > 0
 
 		DispatchQueue.main.async { [unowned self] in
 			self.tableView.flashScrollIndicators()
@@ -881,7 +892,7 @@ extension DropDown {
 
 	/// Returns the height needed to display all cells.
 	fileprivate var tableHeight: CGFloat {
-		return tableView.rowHeight * CGFloat(dataSource.count)
+		return tableView.estimatedRowHeight * CGFloat(dataSource.count)
 	}
 
 }
