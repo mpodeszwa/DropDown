@@ -135,7 +135,7 @@ public final class DropDown: UIView {
 
 	//MARK: Appearance
 	public dynamic var cellHeight = DPDConstant.UI.RowHeight {
-		willSet { tableView.rowHeight = newValue }
+		willSet { tableView.estimatedRowHeight = newValue }
 		didSet { reloadAllComponents() }
 	}
 
@@ -351,7 +351,7 @@ public final class DropDown: UIView {
 	}
 
 	fileprivate var minHeight: CGFloat {
-		return tableView.rowHeight
+		return tableView.estimatedRowHeight
 	}
 
 	fileprivate var didSetupConstraints = false
@@ -442,7 +442,8 @@ private extension DropDown {
 		tableViewContainer.layer.shadowOpacity = shadowOpacity
 		tableViewContainer.layer.shadowRadius = shadowRadius
 
-		tableView.rowHeight = cellHeight
+		tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.estimatedRowHeight = cellHeight
 		tableView.backgroundColor = tableViewBackgroundColor
 		tableView.separatorColor = separatorColor
 		tableView.layer.cornerRadius = cornerRadius
@@ -451,7 +452,6 @@ private extension DropDown {
 		setHiddentState()
 		isHidden = true
 	}
-
 }
 
 //MARK: - UI
@@ -477,9 +477,10 @@ extension DropDown {
 		xConstraint.constant = layout.x
 		yConstraint.constant = layout.y
 		widthConstraint.constant = layout.width
-		heightConstraint.constant = layout.visibleHeight
+        tableView.layoutIfNeeded()
+		heightConstraint.constant = min(layout.visibleHeight, tableView.contentSize.height)
 
-		tableView.isScrollEnabled = layout.offscreenHeight > 0
+//		tableView.isScrollEnabled = layout.offscreenHeight > 0
 
 		DispatchQueue.main.async { [unowned self] in
 			self.tableView.flashScrollIndicators()
@@ -767,6 +768,8 @@ extension DropDown {
 		isHidden = false
 		tableViewContainer.transform = downScaleTransform
 
+		layoutIfNeeded()
+
 		UIView.animate(
 			withDuration: animationduration,
 			delay: 0,
@@ -879,7 +882,7 @@ extension DropDown {
 
 	/// Returns the height needed to display all cells.
 	fileprivate var tableHeight: CGFloat {
-		return tableView.rowHeight * CGFloat(dataSource.count)
+		return tableView.estimatedRowHeight * CGFloat(dataSource.count)
 	}
 
 }
