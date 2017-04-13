@@ -135,7 +135,7 @@ public final class DropDown: UIView {
 
 	//MARK: Appearance
 	public dynamic var cellHeight = DPDConstant.UI.RowHeight {
-		willSet { tableView.rowHeight = newValue }
+		willSet { tableView.estimatedRowHeight = newValue }
 		didSet { reloadAllComponents() }
 	}
 
